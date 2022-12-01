@@ -81,47 +81,21 @@ public class GeneralService extends WebServiceGatewaySupport {
         String responseSp = storedProcedureRepository.executeStoredProcedure("USP_EnviarDocumentoError_S", null);
         log.info("Fin Consulta SP EnviarDocumentoError");
 
-        if(!responseSp.isEmpty() && !"".equals(responseSp)) {
+        if(!responseSp.isEmpty()) {
             Gson g = new Gson();
             RequestAuditoriaDTO requestAuditoriaDTO = g.fromJson(responseSp,RequestAuditoriaDTO.class);
             // sacar el numero registron requestAuditoriaDTO
             AuditoriaParamsDTO  auditoriaParamsDTO = AuditoriaParamsDTO.builder().ip("192.168.0.1").usuario("Leonardo").build();
 
-            Object numeroRegistro= (new JSONObject(responseSp)).getJSONObject("cabecera").get("numeroRegistro");
-            JSONObject json = new JSONObject();
-            json.put("numeroRegistro", numeroRegistro);
-            RequestDTOSP request= RequestDTOSP.builder().entrada(requestAuditoriaDTO.getCabecera()).auditoria(auditoriaParamsDTO).build();
 
-            String responseSpBorrar = storedProcedureRepository.executeStoredProcedure("USP_BorrarRegistroEnviado_D", request.toString());
+                Object numeroRegistro = (new JSONObject(responseSp)).getJSONObject("cabecera").get("numeroRegistro");
+                JSONObject json = new JSONObject();
+                json.put("numeroRegistro", numeroRegistro);
+                RequestDTOSP request = RequestDTOSP.builder().entrada(requestAuditoriaDTO.getCabecera()).auditoria(auditoriaParamsDTO).build();
+                log.info("Borrando tabla de registros de documentos");
+                storedProcedureRepository.executeStoredProcedure("USP_BorrarRegistroEnviado_D", request.toString());
+
         }
-    }
-
-    public GenericResponseDTO consultarSP(GenericRequestDTO request) {
-        return webClient.post()
-                .uri("/generico/consumir-sp")
-                .body(Mono.just(GenericSpBodyDTO.builder()
-                                .schema("Onudi")
-                                .procedureName("USP_EnviarDocumentoError_S")
-                                .jsonIn(null)
-                                .build()),
-                        GenericSpBodyDTO.class)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        clientResponse -> clientResponse
-                                .bodyToMono(GenericResponseDTO.class)
-                                .flatMap(body -> {
-                                    var message = body.getObjectResponse().toString();
-                                    return Mono.error(new NoSuchElementException(message));
-                                }))
-                .onStatus(HttpStatus::is5xxServerError,
-                        clientResponse -> clientResponse
-                                .bodyToMono(GenericResponseDTO.class)
-                                .flatMap(body -> {
-                                    var message = body.getObjectResponse().toString();
-                                    return Mono.error(new Exception(message));
-                                }))
-                .bodyToMono(GenericResponseDTO.class)
-                .block();
     }
 
 }
