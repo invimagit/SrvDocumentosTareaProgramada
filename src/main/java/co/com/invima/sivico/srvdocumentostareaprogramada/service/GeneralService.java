@@ -1,9 +1,7 @@
 package co.com.invima.sivico.srvdocumentostareaprogramada.service;
-import co.com.invima.canonicalmodelsivico.dtosivico.GenericRequestDTO;
-import co.com.invima.canonicalmodelsivico.dtosivico.GenericResponseDTO;
 import co.com.invima.canonicalmodelsivico.dtosivico.requestbody.AuditoriaParamsDTO;
-import co.com.invima.canonicalmodelsivico.dtosivico.requestbody.GenericSpBodyDTO;
 import co.com.invima.sivico.srvdocumentostareaprogramada.config.ConfigProperties;
+import co.com.invima.sivico.srvdocumentostareaprogramada.dto.CabeceraDTO;
 import co.com.invima.sivico.srvdocumentostareaprogramada.dto.RequestAuditoriaDTO;
 import co.com.invima.sivico.srvdocumentostareaprogramada.dto.RequestDTOSP;
 import co.com.invima.sivico.srvdocumentostareaprogramada.repository.StoredProcedureRepository;
@@ -78,19 +76,16 @@ public class GeneralService extends WebServiceGatewaySupport {
 
         //Consulta el procedimiento almacenado
         log.info("Inicio Consulta SP  EnviarDocumentoError");
-        String responseSp = storedProcedureRepository.executeStoredProcedure("USP_EnviarDocumentoError_S", null);
+        String responseSP = storedProcedureRepository.executeStoredProcedure("USP_EnviarDocumentoError_S", null);
+        JSONObject responseSp = new JSONObject(responseSP);
         log.info("Fin Consulta SP EnviarDocumentoError");
 
-        if(!responseSp.isEmpty()) {
+        if(!responseSP.isEmpty() && !Objects.isNull(responseSp.get("cabecera"))) {
             Gson g = new Gson();
-            RequestAuditoriaDTO requestAuditoriaDTO = g.fromJson(responseSp,RequestAuditoriaDTO.class);
+            RequestAuditoriaDTO requestAuditoriaDTO = g.fromJson(responseSP,RequestAuditoriaDTO.class);
             // sacar el numero registron requestAuditoriaDTO
             AuditoriaParamsDTO  auditoriaParamsDTO = AuditoriaParamsDTO.builder().ip("192.168.0.1").usuario("Leonardo").build();
 
-
-                Object numeroRegistro = (new JSONObject(responseSp)).getJSONObject("cabecera").get("numeroRegistro");
-                JSONObject json = new JSONObject();
-                json.put("numeroRegistro", numeroRegistro);
                 RequestDTOSP request = RequestDTOSP.builder().entrada(requestAuditoriaDTO.getCabecera()).auditoria(auditoriaParamsDTO).build();
                 log.info("Borrando tabla de registros de documentos");
                 storedProcedureRepository.executeStoredProcedure("USP_BorrarRegistroEnviado_D", request.toString());
