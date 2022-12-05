@@ -23,6 +23,36 @@
 		<reverse.version>0.0.1-SNAPSHOT</reverse.version>
 		<compiler.version>3.8.1</compiler.version>
 	</properties>
+	
+<repositories>    
+        <repository>
+            <id>maven-group</id>
+            <url>http://192.168.1.224:8081/repository/maven-public-sivicos/</url>
+        </repository> 
+        <repository>
+            <id>redhat-ga</id>
+            <name>Red Hat GA Repository</name>
+            <url>https://maven.repository.redhat.com/ga/</url>
+        </repository>
+
+        <repository>
+            <id>maven central</id>
+            <name>Maven Central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+    </repositories>
+	
+	   <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>http://192.168.1.224:8081/repository/maven-snapshots-sivicos/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus-releases</id>
+            <url>http://192.168.1.224:8081/repository/maven-releases-sivicos/</url>
+        </repository>
+    </distributionManagement>
+	
 	<dependencies>
 		<dependency>
 			<groupId>co.com.invima.canonicalmodelsivico</groupId>
@@ -208,9 +238,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-	</build>
-	<repositories>
-		</repositories>
+	</build>	
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-snapshots</id>
